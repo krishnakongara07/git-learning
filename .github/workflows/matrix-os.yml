@@ -1,0 +1,29 @@
+name: Matrix Strategy Example
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }} # Runs on each OS in the matrix
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest] # Define OS options
+        node-version: [14, 16, 18]                       # Define Node.js versions
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
