@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest] # Define OS options
-        node-version: [14, 16, 18]                       # Define Node.js versions
+        node-version: [18]                       # Define Node.js versions
 
     steps:
       - name: Checkout code
