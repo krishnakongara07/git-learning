@@ -1,0 +1,10 @@
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "description": "A minimal Node.js app",
+  "main": "index.js",
+  "scripts": {
+    "start": "echo 'Starting Docker container!'"
+  },
+  "dependencies": {}
+}
