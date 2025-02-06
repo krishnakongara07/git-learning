@@ -16,8 +16,12 @@ on:
 jobs:
   run-python:
     runs-on: ubuntu-latest
-
     steps:
+      - name: Prevent Accidental PRD Deployment
+        if: ${{ inputs.environment == 'prd' && inputs.confirm_prd != 'CONFIRM_PRD' }}
+        run: |
+          echo "PRD deployment requires explicit confirmation."
+          exit 1
       - name: Checkout code
         uses: actions/checkout@v3
 
