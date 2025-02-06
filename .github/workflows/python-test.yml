@@ -14,6 +14,10 @@ on:
           - 'stg'
           - 'uat'
           - 'prd'
+      confirm_prd:
+        description: 'Type "CONFIRM_PRD" to allow PRD deployment'
+        required: false
+        default: 'NO'        
 jobs:
   run-python:
     runs-on: ubuntu-latest
