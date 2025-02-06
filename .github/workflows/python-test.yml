@@ -13,6 +13,7 @@ on:
           - 'dev'
           - 'stg'
           - 'uat'
+          - 'prd'
 jobs:
   run-python:
     runs-on: ubuntu-latest
