@@ -14,6 +14,7 @@ on:
           - 'stg'
           - 'uat'
           - 'prd'      
+
 jobs:
   validate-access:
     runs-on: ubuntu-latest
@@ -26,20 +27,22 @@ jobs:
           RESTRICTED_USERS=("krishnakongara07" "dev-user2" "dev-user3")  # Add your dev group members here
           if [[ " ${RESTRICTED_USERS[@]} " =~ " ${GITHUB_ACTOR} " ]]; then
             echo "is_restricted=true" >> $GITHUB_ENV
-            echo "User $GITHUB_ACTOR is restricted from deploying to PRD"
+            echo "is_restricted=true" >> $GITHUB_OUTPUT  # Explicitly set output
+            echo "User $GITHUB_ACTOR is restricted from deploying to prd"
           else
             echo "is_restricted=false" >> $GITHUB_ENV
+            echo "is_restricted=false" >> $GITHUB_OUTPUT  # Explicitly set output
           fi
 
   deploy:
     runs-on: ubuntu-latest
     needs: validate-access
-    if: ${{ !(inputs.environment == 'prd' && needs.validate-access.outputs.is_restricted == 'true') }}
+    if: ${{ inputs.environment != 'prd' || needs.validate-access.outputs.is_restricted == 'false' }}
     steps:
       - name: Prevent Unauthorized PRD Deployment
         if: ${{ inputs.environment == 'prd' && needs.validate-access.outputs.is_restricted == 'true' }}
         run: |
-          echo "User $GITHUB_ACTOR is not allowed to deploy to PRD."
+          echo "User $GITHUB_ACTOR is not allowed to deploy to prd."
           exit 1
 
       - name: Checkout Code
