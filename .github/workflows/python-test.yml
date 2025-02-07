@@ -13,11 +13,7 @@ on:
           - 'dev'
           - 'stg'
           - 'uat'
-          - 'prd'
-      confirm_prd:
-        description: 'Type "CONFIRM_PRD" to allow PRD deployment'
-        required: false
-        default: 'NO'        
+          - 'prd'      
 jobs:
   validate-access:
     runs-on: ubuntu-latest
