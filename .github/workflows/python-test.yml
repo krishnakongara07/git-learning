@@ -19,21 +19,38 @@ on:
         required: false
         default: 'NO'        
 jobs:
-  run-python:
+  validate-access:
     runs-on: ubuntu-latest
+    outputs:
+      is_restricted: ${{ steps.check-user.outputs.is_restricted }}
     steps:
-      - name: Prevent Accidental PRD Deployment
-        if: ${{ inputs.environment == 'prd' && inputs.confirm_prd != 'CONFIRM_PRD' }}
+      - name: Check if User is in Restricted List
+        id: check-user
         run: |
-          echo "PRD deployment requires explicit confirmation."
-          exit 1
-      - name: Checkout code
-        uses: actions/checkout@v3
+          RESTRICTED_USERS=("krishnakongara07" "dev-user2" "dev-user3")  # Add your dev group members here
+          if [[ " ${RESTRICTED_USERS[@]} " =~ " ${GITHUB_ACTOR} " ]]; then
+            echo "is_restricted=true" >> $GITHUB_ENV
+            echo "User $GITHUB_ACTOR is restricted from deploying to PRD"
+          else
+            echo "is_restricted=false" >> $GITHUB_ENV
+          fi
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.9'
+  deploy:
+    runs-on: ubuntu-latest
+    needs: validate-access
+    if: ${{ !(inputs.environment == 'prd' && needs.validate-access.outputs.is_restricted == 'true') }}
+    steps:
+      - name: Prevent Unauthorized PRD Deployment
+        if: ${{ inputs.environment == 'prd' && needs.validate-access.outputs.is_restricted == 'true' }}
+        run: |
+          echo "User $GITHUB_ACTOR is not allowed to deploy to PRD."
+          exit 1
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Selected Environment
+        run: echo "Deploying to ${{ inputs.environment }}"
 
       - name: Run Python script
         run: python script2.py
