@@ -1,0 +1,46 @@
+name: "Create Bastion User"
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: "Enter the username"
+        required: true
+      password:
+        description: "Enter the password"
+        required: true
+      ssh_public_key:
+        description: "Enter the SSH public key"
+        required: true
+
+jobs:
+  create-user:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connect to Bastion and Create User
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.BASTION_HOST }}
+          username: ${{ secrets.BASTION_USER }}
+          key: ${{ secrets.BASTION_SSH_PRIVATE_KEY }}
+          script: |
+            USERNAME="${{ github.event.inputs.username }}"
+            PASSWORD="${{ github.event.inputs.password }}"
+            SSH_KEY="${{ github.event.inputs.ssh_public_key }}"
+
+            # Create the user
+            sudo useradd -m -s /bin/bash $USERNAME
+            
+            # Set the password
+            echo "$USERNAME:$PASSWORD" | sudo chpasswd
+
+            # Create SSH directory
+            sudo mkdir -p /home/$USERNAME/.ssh
+            echo "$SSH_KEY" | sudo tee /home/$USERNAME/.ssh/authorized_keys > /dev/null
+
+            # Set correct permissions
+            sudo chmod 700 /home/$USERNAME/.ssh
+            sudo chmod 600 /home/$USERNAME/.ssh/authorized_keys
+            sudo chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh
+
+            echo "User $USERNAME created successfully!"
